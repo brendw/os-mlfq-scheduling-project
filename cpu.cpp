@@ -1,10 +1,8 @@
 #include "process.cpp"
-#include "scheduler.cpp"
 
 class CPU {
 
 int clock;
-Scheduler scheduler;
 
 public:
     CPU(); //constructor

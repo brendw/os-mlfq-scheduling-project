@@ -10,20 +10,11 @@ int main(void) {
     std::vector<int> arrival_times {1,2,3};
     std::vector<int> burst_times {6,7,8};
 
-    //create process list 
-    std::queue<Process> arrivingProcesses; 
-    for (int i = 0 ; i < arrival_times.size() ; i++) {
 
-        Process p(arrival_times[i], burst_times[i]); //create process with attributes
-        arrivingProcesses.push(p);                   //add to list 
-    }
-
-    // ---------------------------------------------------------
-    
-    Scheduler scheduler;
+    Scheduler scheduler(arrival_times, burst_times); 
     CPU cpu; //?
 
-    scheduler.runScheduler(arrivingProcesses);
+    scheduler.runScheduler();
     
 
     return 0;
