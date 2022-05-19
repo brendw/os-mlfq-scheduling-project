@@ -3,12 +3,11 @@
 #include <vector>
 #include <queue>
 
-
 struct CompareProcesses{
     
     // the point is to have a smallest burst_time at the top of the queue
     bool operator()(Process const *p1, Process const *p2 ) {
-        return p1.burstTime > p2.burstTime;
+        return (*p1).totalBurstTime > (*p2).totalBurstTime;
     }
 };
 
@@ -17,20 +16,24 @@ class Scheduler { // MLFQ
     std::queue<Process> queue1;
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue2;
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue3;
+    int RRquantum;
+    int qc; 
+    std::vector<int> wt; //wait times = sentToCPUTime - arrival 
+    std::vector<int> tt; //turnaround times = wt+burst time
     
 public:
-    //Scheduler(); //constructor
+    Scheduler(); //constructor
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
-    std::queue<Process> createProcessList(std::vector<int>, std::vector<int>);
-    void runScheduler();
-
-
+    void runScheduler(std::queue<Process> processes);
+    void addToQc(Process); 
 };
 
-// Scheduler::Scheduler() {
-//     // empty queues
-// }
+Scheduler::Scheduler() {
+    // empty queues 
+    RRquantum = 10; 
+    qc = 0;
+}
 
 void Scheduler::enqueueProcess(Process p, int queueNumber) {
     switch (queueNumber) {
@@ -46,10 +49,10 @@ void Scheduler::enqueueProcess(Process p, int queueNumber) {
     }
 }
 Process Scheduler::dequeueProcess(int currentQueue) {
+    //dequeue the first process to send to CPU
     Process removedProcess;
     switch (currentQueue) {
         case 1:
-            // process did not complete in queue1 RR quantum so will be moved to queue2 or queue3
             removedProcess = queue1.front();
             queue1.pop();
             break;
@@ -65,33 +68,30 @@ Process Scheduler::dequeueProcess(int currentQueue) {
     return removedProcess;
 }
 
-void Scheduler::runScheduler() {
+void Scheduler::runScheduler(std::queue<Process> processes) {
 
-    std::vector<int> arrival_times {1,2,3};
-    std::vector<int> burst_time {6,7,8};
+    wt.reserve(processes.size());
+    tt.reserve(processes.size());
 
     // deal with queue1
 
+    // send first arrived process to CPU
+    // dequeue
+    // for any processes that returns incomplete, add time to qc
+    addToQc(p);
+    // send to either q2 or q3
+    // enqueue(p, 2) or enqueue(p, 3)
 
     // deal with queue2
-
+    // send sjf to cpu
 
     // deal with queue2
-
-
-
+    // send sjf to cpu
 }
 
-std::queue<Process> createProcessList(std::vector<int> arrivalTimes, std::vector<int> burstTimes) {
+void Scheduler::addToQc(Process p) {
 
-    std::queue<Process> arrivingProcesses; 
-
-    for (int i = 0 ; i < arrivalTimes.size() ; i++) {
-
-        Process p(arrivalTimes[i], burstTimes[i]); //create process with attributes
-        arrivingProcesses.push(p);                 //add to list 
-    }
-
-    return arrivingProcesses; 
+    // if time remaining is 0, this won't affect qc
+    qc += p.getTimeRemaining(); 
 
 }

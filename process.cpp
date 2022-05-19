@@ -3,6 +3,7 @@ class Process {
 int arrivalTime;
 int timeRemaining;
 int waitingTime;
+int turnaroundTime;
 
 public:
     int totalBurstTime;
@@ -10,6 +11,7 @@ public:
     Process(int, int);
     int getTimeRemaining();
     void decrementTimeRemaining(int);
+    void updateWaitTime(int, int);
 
 };
 
@@ -26,4 +28,7 @@ int Process::getTimeRemaining(){
 }
 void Process::decrementTimeRemaining(int burst) {
     timeRemaining -= burst;
+}
+void Process::updateWaitTime(int arrivalTime, int sentToCPUTime) {
+    waitingTime += sentToCPUTime - arrivalTime; 
 }
