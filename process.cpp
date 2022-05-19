@@ -1,13 +1,13 @@
-
-
 class Process {
 
-int totalTime;
+int arrivalTime;
 int timeRemaining;
+int waitingTime;
 
 public:
+    int totalBurstTime;
     Process();
-    Process(int);
+    Process(int, int);
     int getTimeRemaining();
     void decrementTimeRemaining(int);
 
@@ -15,9 +15,11 @@ public:
 
 Process::Process() {};
 
-Process::Process(int time) {
-    totalTime = time;
-    timeRemaining =time;
+Process::Process(int arrival, int burst) {
+    arrivalTime = arrival;
+    totalBurstTime = burst;
+    timeRemaining = burst;
+    waitingTime = 0;
 }
 int Process::getTimeRemaining(){
     return timeRemaining;

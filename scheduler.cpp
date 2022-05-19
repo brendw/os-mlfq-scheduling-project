@@ -12,7 +12,8 @@ struct CompareProcesses{
     }
 };
 
-class Scheduler {
+class Scheduler { // MLFQ 
+
     std::queue<Process> queue1;
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue2;
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue3;
@@ -21,6 +22,9 @@ public:
     //Scheduler(); //constructor
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
+    std::queue<Process> createProcessList(std::vector<int>, std::vector<int>);
+    void runScheduler();
+
 
 };
 
@@ -45,7 +49,7 @@ Process Scheduler::dequeueProcess(int currentQueue) {
     Process removedProcess;
     switch (currentQueue) {
         case 1:
-            // process did not complete in queue1 RR quantum so will be moved to queue2
+            // process did not complete in queue1 RR quantum so will be moved to queue2 or queue3
             removedProcess = queue1.front();
             queue1.pop();
             break;
@@ -59,4 +63,35 @@ Process Scheduler::dequeueProcess(int currentQueue) {
             break;
     }
     return removedProcess;
+}
+
+void Scheduler::runScheduler() {
+
+    std::vector<int> arrival_times {1,2,3};
+    std::vector<int> burst_time {6,7,8};
+
+    // deal with queue1
+
+
+    // deal with queue2
+
+
+    // deal with queue2
+
+
+
+}
+
+std::queue<Process> createProcessList(std::vector<int> arrivalTimes, std::vector<int> burstTimes) {
+
+    std::queue<Process> arrivingProcesses; 
+
+    for (int i = 0 ; i < arrivalTimes.size() ; i++) {
+
+        Process p(arrivalTimes[i], burstTimes[i]); //create process with attributes
+        arrivingProcesses.push(p);                 //add to list 
+    }
+
+    return arrivingProcesses; 
+
 }
