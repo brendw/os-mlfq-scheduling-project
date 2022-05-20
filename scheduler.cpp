@@ -74,8 +74,10 @@ void Scheduler::runScheduler() {
         std::cout << "Current clock: " << clock << std::endl;
 
         if (processList.size() != 0 && clock == processList.front().getArrivalTime()) {
-            std::cout << "A process has arrived and been inserted into queue 1 at clock " << clock << std::endl;
-            enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
+            while (processList.size() != 0 && clock == processList.front().getArrivalTime()) {
+                std::cout << "A process has arrived and been inserted into queue 1 at clock " << clock << std::endl;
+                enqueueProcess(dequeueProcess(0), 1); //dequeue from processlist and add to queue1 
+            }
         }
 
         //if the cpu is busy, just let it do its shit
@@ -86,13 +88,18 @@ void Scheduler::runScheduler() {
             //check if the current task processing has ended
             if (cpu.endOfTask()) {
                 Process returnedProcess = cpu.relinquishProcess();
+                tasksRemainingCount--;
 
                 //check if this task is done
                 if (returnedProcess.getFinished()) {
                     //do stuff
+                    std::cout << "Returned process completed at clock " << clock << std::endl;
+                    returnedProcess.setFinishedTime(clock);
                 }
                 else {
                     //push this process somewhere else
+                    std::cout << "Returned process being inserted into q2q3 process queue at clock " << clock << std::endl;
+                    enqueueProcess(returnedProcess, 4);
                 }
             }
         } else if (queue1.size() != 0) { //if there are tasks to run in queue 1, grab one and feed it to the cpu
@@ -101,6 +108,7 @@ void Scheduler::runScheduler() {
             //feed this process to the cpu
             cpu.insertTask(readyP, 10);
             std::cout << "Inserting a new process at clock " << clock << std::endl;
+            cpu.runTask(clock);
         }
         //else if (queue2.size() != 0) { //if there are tasks to run in queue 2, grab one and feed it to the cpu
 
@@ -129,44 +137,82 @@ void Scheduler::runScheduler() {
         clock++;
     }
 
+    std::cout << "Finished queue 1 processing" << std::endl;
+
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
     moveQCQueueToQ23(clock);
 
     // deal with queue2 and queue3
     int q2_counter = 0; 
-    cpu.resetFinishedTime(); 
+    //cpu.resetFinishedTime(); 
 
-    while (queue2.size() != 0 || queue3.size() != 0) {
-        std::cout << clock << std::endl;
+    while (cpu.isBusy() || queue2.size() != 0 || queue3.size() != 0) {
+    //while (!cpu.isBusy() && queue2.size() > 0 && queue3.size() > 0) {
+        //std::cout << clock << std::endl;
+        std::cout << "Current clock: " << clock << std::endl;
+        
         // deal with q2 & q3 -> send sjf to cpu
-
         int chosenQueue; 
 
         if (queue2.size() == 0) {
             chosenQueue = 3;
         }
         else if (queue3.size() == 0) {
-            chosenQueue = 2; 
+            chosenQueue = 2;
         }
-        else if (q2_counter++ < 3) {
+        else if (q2_counter < 3) {
             chosenQueue = 2;
         }
         else if (q2_counter == 3) {
             chosenQueue = 3;
-            q2_counter = 0; 
+            q2_counter = 0;
         }
 
-        if (!cpu.isBusy(clock)) {
+        if (cpu.isBusy()) {
+            //run the task
+            cpu.runTask(clock);
 
-            Process p = dequeueProcess(chosenQueue);
-            p.addWaitTime(clock, chosenQueue);
+            if (cpu.endOfTask()) {
+                Process returnedProcess = cpu.relinquishProcess();
+                //tasksRemainingCount--;
 
-            //Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
+                std::cout << "Returned process completed at clock " << clock << std::endl;
+                returnedProcess.setFinishedTime(clock);
 
-            //record wt and tt for completed processes
-            //wt.push_back(returnedTask.getWaitTime()); 
-            //tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
+                //check if this task is done
+                //if (returnedProcess.getFinished()) {
+                //    //do stuff
+                //    std::cout << "Returned process completed at clock " << clock << std::endl;
+                //    returnedProcess.setFinishedTime(clock);
+                //}
+                //else {
+                //    //push this process somewhere else
+                //    std::cout << "Returned process being inserted into q2q3 process queue at clock " << clock << std::endl;
+                //    enqueueProcess(returnedProcess, 4);
+                //}
+            }
         }
+        else {
+            Process newProcess = dequeueProcess(chosenQueue);
+            cpu.insertTask(newProcess, 99999999);
+            if (chosenQueue == 2) {
+                q2_counter++;
+            }
+            std::cout << "Inserting a new process at clock " << clock << std::endl;
+            cpu.runTask(clock);
+        }
+
+        //if (!cpu.isBusy(clock)) {
+
+        //    Process p = dequeueProcess(chosenQueue);
+        //    p.addWaitTime(clock, chosenQueue);
+
+        //    //Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
+
+        //    //record wt and tt for completed processes
+        //    //wt.push_back(returnedTask.getWaitTime()); 
+        //    //tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
+        //}
         clock++; 
     }
 } //end runScheduler
