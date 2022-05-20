@@ -2,38 +2,51 @@
 #include <iostream>
 
 CPU::CPU() {
-    resetFinishedTime(); 
+    resetFinishedTime();
+    currentlyBusy = false; 
 }
 
-Process CPU::runTask(Process p, int quantum, int currentClock) {
+void CPU::runTask(Process p, int quantum, int currentClock) {
 
+    currentProcess = p; 
     int remainingTime = p.getRemainingTime();
+    currentlyBusy = true;
 
     if (remainingTime > quantum) {
-        p.decrementTimeRemaining(quantum);
+        currentProcess.decrementTimeRemaining(quantum);
+        remainingTime -= quantum;
         finishedTime = currentClock + quantum;
     }
     else {
-        p.decrementTimeRemaining(remainingTime); //remaining is 0 
+        currentProcess.decrementTimeRemaining(remainingTime); //remaining is 0 
         finishedTime = currentClock + remainingTime;
     }
-    p.setFinishedTime(finishedTime);
-    return p; 
-
+    currentProcess.setFinishedTime(finishedTime);
 }
+
 int CPU::getFinishedTime() {
     return finishedTime;
 }
 
 bool CPU::isBusy(int currentClock) {
-    if (finishedTime == currentClock) {
-        resetFinishedTime();
-    }
-    
+
     bool busy = true ? currentClock < finishedTime : false;
-    std::cout << "-" << busy << std::endl;
+    currentlyBusy = busy;
+    std::cout << "busy: " << busy << std::endl;
     return busy;
 }
 void CPU::resetFinishedTime() {
     finishedTime = -1;
+}
+
+Process CPU::returnProcess(int returnTime) {
+    if (finishedTime == returnTime) {
+        currentlyBusy = false;
+        resetFinishedTime();
+        return currentProcess;
+    }
+    else {
+        Process p(-1, -1);
+        return p; 
+    }
 }

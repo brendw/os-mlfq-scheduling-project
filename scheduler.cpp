@@ -68,23 +68,22 @@ void Scheduler::runScheduler() {
     int clock = 0; //start the clock 
     CPU cpu; //instantiate CPU 
 
-    int tasksRemainingCount = processList.size() + 1;
+    int tasksRemainingCount = processList.size();
+
     // deal with queue1 arrivals and RR 
     while (tasksRemainingCount > 0 ) {
-        std::cout << clock; 
+        std::cout << clock << std::endl;
 
-        if (processList.size() != 0 && clock == processList.front().getArrivalTime()) {
+        while (processList.size() != 0 && clock == processList.front().getArrivalTime() ) {
 
             enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
         }
 
-        if (queue1.size() != 0 && !cpu.isBusy(clock)) {
-
-            Process readyP = dequeueProcess(1);
-            readyP.addWaitTime(clock, 1); 
-            Process queue1CPUReturn = cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
-            --tasksRemainingCount;
-
+        // check if there's a return process from CPU
+        Process queue1CPUReturn = cpu.returnProcess(clock); //return from CPU;
+        
+        if (queue1CPUReturn.getArrivalTime() != -1) {
+            std::cout << "process returned from CPU" << std::endl;
             int extraTime = queue1CPUReturn.getRemainingTime();
             if (extraTime > 0) {
                 enqueueProcess( queue1CPUReturn, 4 ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
@@ -94,22 +93,44 @@ void Scheduler::runScheduler() {
                 wt.push_back(queue1CPUReturn.getWaitTime()); 
                 tt.push_back(queue1CPUReturn.getFinishedTime()-queue1CPUReturn.getArrivalTime());    
             }
-        }
-        clock++;
-    }
+            --tasksRemainingCount;
+        } //else a process did not return 
 
+        // send ready process to CPU is free
+        if (queue1.size() != 0 && !cpu.isBusy(clock)) {
+
+            Process readyP = dequeueProcess(1);
+            readyP.addWaitTime(clock, 1); 
+            cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
+        } 
+
+        clock++;
+
+    } // while tasksRemain
+    --clock;
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
     moveQCQueueToQ23(clock);
 
     // deal with queue2 and queue3
-    int q2_counter = 0; 
-    cpu.resetFinishedTime(); 
+    tasksRemainingCount = queue2.size() + queue3.size(); 
 
-    while (queue2.size() != 0 || queue3.size() != 0) {
+    while (tasksRemainingCount) { // deal with q2 & q3 -> send sjf to cpu
         std::cout << clock << std::endl;
-        // deal with q2 & q3 -> send sjf to cpu
+        
+        // check if there's a return process from CPU
+        Process returnP = cpu.returnProcess(clock); //return from CPU;
+        
+        if (returnP.getArrivalTime() != -1) {
+            std::cout << "process returned from CPU" << std::endl;
+            //record wt and tt for completed processes
+            wt.push_back(returnP.getWaitTime()); 
+            tt.push_back(returnP.getFinishedTime()-returnP.getArrivalTime());    
+            --tasksRemainingCount;
+        } //else a process did not return 
 
-        int chosenQueue; 
+        // pick whether process comes from q2 or q3 for cpu
+        int q2_counter = 0; 
+        int chosenQueue;
 
         if (queue2.size() == 0) {
             chosenQueue = 3;
@@ -123,21 +144,19 @@ void Scheduler::runScheduler() {
         else if (q2_counter == 3) {
             chosenQueue = 3;
             q2_counter = 0; 
-        }
+        } 
 
-        if (!cpu.isBusy(clock)) {
+        // send ready process to CPU if free
+        if ((queue2.size() != 0 || queue3.size() ) && !cpu.isBusy(clock)) {
 
-            Process p = dequeueProcess(chosenQueue);
-            p.addWaitTime(clock, chosenQueue);
+            Process readyP = dequeueProcess(chosenQueue);
+            readyP.addWaitTime(clock, chosenQueue);
 
-            Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
-
-            //record wt and tt for completed processes
-            wt.push_back(returnedTask.getWaitTime()); 
-            tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
+            cpu.runTask(readyP, readyP.getRemainingTime() , clock); // send shortest job to CPU
         }
         clock++; 
-    }
+
+    } //end tasksRemaining on q2/q3
 } //end runScheduler
 
 void Scheduler::moveQCQueueToQ23(int clock){
