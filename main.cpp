@@ -1,8 +1,5 @@
 #include <iostream>
-#include "process.cpp"
-#include "scheduler.cpp"
-#include "cpu.cpp"
-#include <queue>
+#include "scheduler.hpp"
 
 int main(void) {
 
@@ -15,7 +12,6 @@ int main(void) {
     CPU cpu; //?
 
     scheduler.runScheduler();
-    
 
     return 0;
 }

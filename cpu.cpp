@@ -1,21 +1,14 @@
-#include "process.cpp"
-
-class CPU {
-
-int clock;
-
-public:
-    CPU(); //constructor
-    Process runTask(Process, int);
-};
+#include "cpu.hpp"
 
 CPU::CPU() {
-    clock = 0; //?
+    currentTaskBurstTime; 
 }
 
-Process runTask(Process p, int quantum) {
+Process CPU::runTask(Process p, int quantum) {
 
-    int remainingTime = p.getTimeRemaining();
+    currentTaskBurstTime = p.getRemainingTime();
+
+    int remainingTime = p.getRemainingTime();
 
     if (remainingTime > quantum) {
         p.decrementTimeRemaining(quantum);
@@ -26,4 +19,12 @@ Process runTask(Process p, int quantum) {
     
     return p; 
 
+}
+int CPU::getCurrentTaskBurstTime() {
+    return currentTaskBurstTime;
+}
+
+bool CPU::isBusy(){
+    if (currentTaskBurstTime>0) 
+        return true;
 }
