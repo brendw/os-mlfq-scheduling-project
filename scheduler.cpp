@@ -169,7 +169,6 @@ void Scheduler::runScheduler() {
         }
         else if (q2_counter == 3) {
             chosenQueue = 3;
-            q2_counter = 0;
         }
 
         if (cpu.isBusy()) {
@@ -204,6 +203,9 @@ void Scheduler::runScheduler() {
             cpu.insertTask(newProcess, 99999999);
             if (chosenQueue == 2) {
                 q2_counter++;
+            }
+            else if (chosenQueue == 3) {
+                q2_counter = 0;
             }
             std::cout << "Inserting a new process at clock " << clock << std::endl;
             cpu.runTask(clock);
