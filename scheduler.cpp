@@ -95,16 +95,20 @@ void Scheduler::runScheduler() {
                     //do stuff
                     std::cout << "Returned process completed at clock " << clock << std::endl;
                     returnedProcess.setFinishedTime(clock);
+                    wt.push_back(returnedProcess.getWaitTime());
+                    tt.push_back(returnedProcess.getFinishedTime() - returnedProcess.getArrivalTime());
                 }
                 else {
                     //push this process somewhere else
                     std::cout << "Returned process being inserted into q2q3 process queue at clock " << clock << std::endl;
+                    returnedProcess.setSecondArrivalTime(clock);
                     enqueueProcess(returnedProcess, 4);
                 }
             }
         } else if (queue1.size() != 0) { //if there are tasks to run in queue 1, grab one and feed it to the cpu
             //get the next task
             Process readyP = dequeueProcess(1);
+            readyP.addWaitTime(clock, 1);
             //feed this process to the cpu
             cpu.insertTask(readyP, 10);
             std::cout << "Inserting a new process at clock " << clock << std::endl;
@@ -178,6 +182,8 @@ void Scheduler::runScheduler() {
 
                 std::cout << "Returned process completed at clock " << clock << std::endl;
                 returnedProcess.setFinishedTime(clock);
+                wt.push_back(returnedProcess.getWaitTime());
+                tt.push_back(returnedProcess.getFinishedTime() - returnedProcess.getArrivalTime());
 
                 //check if this task is done
                 //if (returnedProcess.getFinished()) {
@@ -194,6 +200,7 @@ void Scheduler::runScheduler() {
         }
         else {
             Process newProcess = dequeueProcess(chosenQueue);
+            newProcess.addWaitTime(clock, 2);
             cpu.insertTask(newProcess, 99999999);
             if (chosenQueue == 2) {
                 q2_counter++;
@@ -246,7 +253,8 @@ void Scheduler::moveQCQueueToQ23(int clock){
 
 void Scheduler::printBenchMarks() {
 
-    int aveWT, aveTT;
+    int aveWT = 0;
+    int aveTT = 0;
 
     int totalCount = wt.size();
 
