@@ -72,7 +72,7 @@ void Scheduler::runScheduler() {
 
     // deal with queue1 arrivals and RR 
     while (tasksRemainingCount > 0 ) {
-        std::cout << clock << std::endl;
+        std::cout << clock;
 
         while (processList.size() != 0 && clock == processList.front().getArrivalTime() ) {
 
@@ -105,7 +105,7 @@ void Scheduler::runScheduler() {
         } 
 
         clock++;
-
+        std::cout<<std::endl;
     } // while tasksRemain
     --clock;
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
@@ -113,9 +113,10 @@ void Scheduler::runScheduler() {
 
     // deal with queue2 and queue3
     tasksRemainingCount = queue2.size() + queue3.size(); 
+    int q2_counter = 0; 
 
     while (tasksRemainingCount) { // deal with q2 & q3 -> send sjf to cpu
-        std::cout << clock << std::endl;
+        std::cout << clock; 
         
         // check if there's a return process from CPU
         Process returnP = cpu.returnProcess(clock); //return from CPU;
@@ -129,25 +130,25 @@ void Scheduler::runScheduler() {
         } //else a process did not return 
 
         // pick whether process comes from q2 or q3 for cpu
-        int q2_counter = 0; 
         int chosenQueue;
-
-        if (queue2.size() == 0) {
-            chosenQueue = 3;
-        }
-        else if (queue3.size() == 0) {
-            chosenQueue = 2; 
-        }
-        else if (q2_counter++ < 3) {
-            chosenQueue = 2;
-        }
-        else if (q2_counter == 3) {
-            chosenQueue = 3;
-            q2_counter = 0; 
-        } 
 
         // send ready process to CPU if free
         if ((queue2.size() != 0 || queue3.size() ) && !cpu.isBusy(clock)) {
+
+            if (queue2.size() == 0) {
+                chosenQueue = 3;
+            }
+            else if (queue3.size() == 0) {
+                chosenQueue = 2; 
+            }
+            else if (q2_counter < 3) {
+                chosenQueue = 2;
+                ++q2_counter;
+            }
+            else if (q2_counter == 3) {
+                chosenQueue = 3;
+                q2_counter = 0; 
+            } 
 
             Process readyP = dequeueProcess(chosenQueue);
             readyP.addWaitTime(clock, chosenQueue);
@@ -155,7 +156,7 @@ void Scheduler::runScheduler() {
             cpu.runTask(readyP, readyP.getRemainingTime() , clock); // send shortest job to CPU
         }
         clock++; 
-
+        std::cout<<std::endl;
     } //end tasksRemaining on q2/q3
 } //end runScheduler
 

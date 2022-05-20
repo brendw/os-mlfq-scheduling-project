@@ -32,7 +32,7 @@ bool CPU::isBusy(int currentClock) {
 
     bool busy = true ? currentClock < finishedTime : false;
     currentlyBusy = busy;
-    std::cout << "busy: " << busy << std::endl;
+    std::cout << " - busy: " << busy << std::endl;
     return busy;
 }
 void CPU::resetFinishedTime() {
