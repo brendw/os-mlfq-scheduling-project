@@ -9,9 +9,8 @@ int main(void) {
 
 
     Scheduler scheduler(arrival_times, burst_times); 
-    CPU cpu; //?
-
     scheduler.runScheduler();
+    scheduler.printBenchMarks(); 
 
     return 0;
 }

@@ -31,7 +31,6 @@ class Scheduler {
     
     void createProcessesList(std::vector<int>, std::vector<int>);
     std::queue<Process> processList;
-    bool processesRemain; 
 
     // benchmarks 
     std::vector<int> wt; //wait times = sentToCPUTime - arrival 
@@ -43,6 +42,7 @@ public:
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
+    void printBenchMarks();
 
 }; //class Scheduler
 

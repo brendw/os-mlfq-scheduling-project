@@ -5,12 +5,14 @@
 
 class CPU {
 
-int currentTaskBurstTime; 
+int finishedTime; 
 
 public:
     CPU(); //constructor
-    Process runTask(Process, int);
-    int getCurrentTaskBurstTime();
+    Process runTask(Process, int, int, int);
+    //int getFinishedTime();
+    bool isBusy(int); 
+    void resetFinishedTime(); 
 };
 
 #endif

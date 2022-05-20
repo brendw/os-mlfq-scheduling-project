@@ -3,21 +3,33 @@
 
 class Process {
 
-int arrivalTime;
+int arrivalTime; //first arrives to RR queue1
+int arrivalTime2; //arrives to q2/q3
 int timeRemaining;
 int waitingTime;
 int turnaroundTime;
+int startWaitingClock;
+int finishedTime;  
 
 public:
     int totalBurstTime;
     Process();
     Process(int, int);
-    int getRemainingTime();
-    int getArrivalTime();
-    void decrementTimeRemaining(int);
-    void updateWaitTime(int, int);
-    void operator=(const Process &p);
+    //void operator=(const Process &p);
 
+    int getRemainingTime();
+    void decrementTimeRemaining(int);
+    
+    void addWaitTime(int, int);
+    void updateWaitTime(int, int);
+    int getWaitTime();
+
+    void setFinishedTime(int);
+    int getFinishedTime();
+
+    int getArrivalTime();
+    void setSecondArrivalTime(int);
+    int getSecondArrivalTime();
 };
 
 #endif 
