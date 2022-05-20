@@ -10,7 +10,7 @@ int finishedTime;
 public:
     CPU(); //constructor
     Process runTask(Process, int, int, int);
-    //int getFinishedTime();
+    int getFinishedTime();
     bool isBusy(int); 
     void resetFinishedTime(); 
 };

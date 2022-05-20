@@ -77,7 +77,7 @@ void Scheduler::runScheduler() {
             enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
         }
 
-        if (queue1.size() != 0 and not cpu.isBusy(clock)) {
+        if (queue1.size() != 0 && !cpu.isBusy(clock)) {
 
             Process queue1CPUReturn = cpu.runTask(dequeueProcess(1), RRquantum, clock, 1); // send first arrived process to CPU
     
@@ -121,7 +121,7 @@ void Scheduler::runScheduler() {
     int q2_counter = 0; 
     cpu.resetFinishedTime(); 
 
-    while (queue2.size() != 0 or queue3.size() != 0) {
+    while (queue2.size() != 0 || queue3.size() != 0) {
         
         // deal with q2 & q3 -> send sjf to cpu
 
@@ -141,7 +141,7 @@ void Scheduler::runScheduler() {
             q2_counter = 0; 
         }
 
-        if (not cpu.isBusy(clock)) {
+        if (!cpu.isBusy(clock)) {
 
             Process p = dequeueProcess(chosenQueue);
 

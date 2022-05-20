@@ -22,9 +22,9 @@ Process CPU::runTask(Process p, int quantum, int currentClock, int queue) {
     return p; 
 
 }
-// int CPU::getFinishedTime() {
-//     return finishedTime;
-// }
+int CPU::getFinishedTime() {
+    return finishedTime;
+}
 
 bool CPU::isBusy(int currentClock) {
     return true ? currentClock < finishedTime : false;
