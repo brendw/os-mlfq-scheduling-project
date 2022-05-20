@@ -24,6 +24,10 @@ void Process::decrementTimeRemaining(int burst) {
     timeRemaining -= burst;
 }
 
+bool Process::getFinished() {
+    return timeRemaining == 0;
+}
+
 void Process::addWaitTime(int clock, int whichArrival) {
 
     if (whichArrival == 1)

@@ -68,33 +68,64 @@ void Scheduler::runScheduler() {
     int clock = 0; //start the clock 
     CPU cpu; //instantiate CPU 
 
-    int tasksRemainingCount = processList.size() + 1;
+    int tasksRemainingCount = processList.size();
     // deal with queue1 arrivals and RR 
     while (tasksRemainingCount > 0 ) {
-        std::cout << clock; 
+        std::cout << "Current clock: " << clock << std::endl;
 
         if (processList.size() != 0 && clock == processList.front().getArrivalTime()) {
-
+            std::cout << "A process has arrived and been inserted into queue 1 at clock " << clock << std::endl;
             enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
         }
 
-        if (queue1.size() != 0 && !cpu.isBusy(clock)) {
+        //if the cpu is busy, just let it do its shit
+        if (cpu.isBusy()) {
+            //run the task
+            cpu.runTask(clock);
 
+            //check if the current task processing has ended
+            if (cpu.endOfTask()) {
+                Process returnedProcess = cpu.relinquishProcess();
+
+                //check if this task is done
+                if (returnedProcess.getFinished()) {
+                    //do stuff
+                }
+                else {
+                    //push this process somewhere else
+                }
+            }
+        } else if (queue1.size() != 0) { //if there are tasks to run in queue 1, grab one and feed it to the cpu
+            //get the next task
             Process readyP = dequeueProcess(1);
-            readyP.addWaitTime(clock, 1); 
-            Process queue1CPUReturn = cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
-            --tasksRemainingCount;
-
-            int extraTime = queue1CPUReturn.getRemainingTime();
-            if (extraTime > 0) {
-                enqueueProcess( queue1CPUReturn, 4 ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
-            }
-            else {
-                //record wt and tt for completed processes
-                wt.push_back(queue1CPUReturn.getWaitTime()); 
-                tt.push_back(queue1CPUReturn.getFinishedTime()-queue1CPUReturn.getArrivalTime());    
-            }
+            //feed this process to the cpu
+            cpu.insertTask(readyP, 10);
+            std::cout << "Inserting a new process at clock " << clock << std::endl;
         }
+        //else if (queue2.size() != 0) { //if there are tasks to run in queue 2, grab one and feed it to the cpu
+
+        //}
+        //else if (queue3.size() != 0) { //if there are tasks to run in queue 3, grab one and feed it to the cpu
+
+        //}
+
+        //if (queue1.size() != 0 && !cpu.isBusy(clock)) {
+
+        //    Process readyP = dequeueProcess(1);
+        //    readyP.addWaitTime(clock, 1); 
+        //    Process queue1CPUReturn = cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
+        //    --tasksRemainingCount;
+
+        //    int extraTime = queue1CPUReturn.getRemainingTime();
+        //    if (extraTime > 0) {
+        //        enqueueProcess( queue1CPUReturn, 4 ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
+        //    }
+        //    else {
+        //        //record wt and tt for completed processes
+        //        wt.push_back(queue1CPUReturn.getWaitTime()); 
+        //        tt.push_back(queue1CPUReturn.getFinishedTime()-queue1CPUReturn.getArrivalTime());    
+        //    }
+        //}
         clock++;
     }
 
@@ -130,11 +161,11 @@ void Scheduler::runScheduler() {
             Process p = dequeueProcess(chosenQueue);
             p.addWaitTime(clock, chosenQueue);
 
-            Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
+            //Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
 
             //record wt and tt for completed processes
-            wt.push_back(returnedTask.getWaitTime()); 
-            tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
+            //wt.push_back(returnedTask.getWaitTime()); 
+            //tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
         }
         clock++; 
     }

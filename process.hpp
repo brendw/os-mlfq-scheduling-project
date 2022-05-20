@@ -19,6 +19,7 @@ public:
 
     int getRemainingTime();
     void decrementTimeRemaining(int); //used in cpu 
+    bool getFinished();
     
     void addWaitTime(int, int);
     int getWaitTime();

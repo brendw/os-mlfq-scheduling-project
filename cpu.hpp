@@ -5,12 +5,20 @@
 
 class CPU {
 
-int finishedTime; 
+int finishedTime;
+int remainingQuantum;
+Process currentProcess;
+bool hasProcess;
 
 public:
     CPU(); //constructor
-    Process runTask(Process, int, int);
+    void insertTask(Process, int);
+    void runTask(int);
+    bool endOfTask();
+    Process relinquishProcess();
+
     int getFinishedTime();
+    bool isBusy();
     bool isBusy(int); 
     void resetFinishedTime(); 
 };
