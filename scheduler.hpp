@@ -42,6 +42,7 @@ public:
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
+    void moveQCQueueToQ23(int);
     void printBenchMarks();
 
 }; //class Scheduler

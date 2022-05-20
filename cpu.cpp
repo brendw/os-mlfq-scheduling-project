@@ -1,4 +1,5 @@
 #include "cpu.hpp"
+#include <iostream>
 
 CPU::CPU() {
     resetFinishedTime(); 
@@ -28,7 +29,10 @@ bool CPU::isBusy(int currentClock) {
     if (finishedTime == currentClock) {
         resetFinishedTime();
     }
-    return true ? currentClock < finishedTime : false;
+    
+    bool busy = true ? currentClock < finishedTime : false;
+    std::cout << "-" << busy << std::endl;
+    return busy;
 }
 void CPU::resetFinishedTime() {
     finishedTime = -1;

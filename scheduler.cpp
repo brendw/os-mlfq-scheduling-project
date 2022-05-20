@@ -1,4 +1,5 @@
 #include "scheduler.hpp"
+#include <iostream>
 
 Scheduler::Scheduler(std::vector<int> arrival_times, std::vector<int> burst_times) { //constructor
     // queues are already empty
@@ -33,7 +34,6 @@ void Scheduler::enqueueProcess(Process p, int queueNumber) {
         case 4:
             qc_queue.push(p);
     }
-
 }
 Process Scheduler::dequeueProcess(int currentQueue) {
     //dequeue the first process to send to CPU
@@ -68,10 +68,12 @@ void Scheduler::runScheduler() {
     int clock = 0; //start the clock 
     CPU cpu; //instantiate CPU 
 
+    int tasksRemainingCount = processList.size() + 1;
     // deal with queue1 arrivals and RR 
-    while (processList.size() != 0 || queue1.size() != 0) {
+    while (tasksRemainingCount > 0 ) {
+        std::cout << clock; 
 
-        if (clock == processList.front().getArrivalTime()) {
+        if (processList.size() != 0 && clock == processList.front().getArrivalTime()) {
 
             enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
         }
@@ -81,7 +83,8 @@ void Scheduler::runScheduler() {
             Process readyP = dequeueProcess(1);
             readyP.addWaitTime(clock, 1); 
             Process queue1CPUReturn = cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
-    
+            --tasksRemainingCount;
+
             int extraTime = queue1CPUReturn.getRemainingTime();
             if (extraTime > 0) {
                 enqueueProcess( queue1CPUReturn, 4 ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
@@ -96,28 +99,8 @@ void Scheduler::runScheduler() {
     }
 
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
-    int percentile_index = qc_queue.size() * 3/4; 
-    int percentile_time;
+    moveQCQueueToQ23(clock);
 
-    if (qc_queue.size() != 0) {
-
-        for (int i = 0 ; i <= percentile_index ; i++ ) {
-            
-            Process p = dequeueProcess(4);
-
-            if ( i == percentile_index) {
-                percentile_time = p.getRemainingTime();
-            }
-            p.setSecondArrivalTime(clock);
-            enqueueProcess( p , 2 ); //pop from qc_queue and enqueue on queue2
-        }
-
-        for (int i = 0 ; i<qc_queue.size() ; i++) { //whatever is left on qc_queue goes to queue3
-            Process p = dequeueProcess(4);
-            p.setSecondArrivalTime(clock);
-            enqueueProcess(p, 3); 
-        }
-    }
     // deal with queue2 and queue3
     int q2_counter = 0; 
     cpu.resetFinishedTime(); 
@@ -152,12 +135,37 @@ void Scheduler::runScheduler() {
             //record wt and tt for completed processes
             wt.push_back(returnedTask.getWaitTime()); 
             tt.push_back(returnedTask.getFinishedTime()-returnedTask.getArrivalTime());    
-
         }
-
         clock++; 
     }
 } //end runScheduler
+
+void Scheduler::moveQCQueueToQ23(int clock){
+
+    //find percentile of qc_queue (already sorted) and place processes onto queues2&3
+    int percentile_index = qc_queue.size() * 3/4; 
+    int percentile_time;
+
+    if (qc_queue.size() != 0) {
+
+        for (int i = 0 ; i <= percentile_index ; i++ ) {
+            
+            Process p = dequeueProcess(4);
+
+            if ( i == percentile_index) {
+                percentile_time = p.getRemainingTime();
+            }
+            p.setSecondArrivalTime(clock);
+            enqueueProcess( p , 2 ); //pop from qc_queue and enqueue on queue2
+        }
+
+        for (int i = 0 ; i<qc_queue.size() ; i++) { //whatever is left on qc_queue goes to queue3
+            Process p = dequeueProcess(4);
+            p.setSecondArrivalTime(clock);
+            enqueueProcess(p, 3); 
+        }
+    }
+}
 
 void Scheduler::printBenchMarks() {
 
