@@ -18,10 +18,9 @@ public:
     //void operator=(const Process &p);
 
     int getRemainingTime();
-    void decrementTimeRemaining(int);
+    void decrementTimeRemaining(int); //used in cpu 
     
     void addWaitTime(int, int);
-    void updateWaitTime(int, int);
     int getWaitTime();
 
     void setFinishedTime(int);

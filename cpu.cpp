@@ -4,9 +4,7 @@ CPU::CPU() {
     resetFinishedTime(); 
 }
 
-Process CPU::runTask(Process p, int quantum, int currentClock, int queue) {
-
-    p.updateWaitTime(currentClock, queue);
+Process CPU::runTask(Process p, int quantum, int currentClock) {
 
     int remainingTime = p.getRemainingTime();
 
@@ -27,6 +25,9 @@ int CPU::getFinishedTime() {
 }
 
 bool CPU::isBusy(int currentClock) {
+    if (finishedTime == currentClock) {
+        resetFinishedTime();
+    }
     return true ? currentClock < finishedTime : false;
 }
 void CPU::resetFinishedTime() {

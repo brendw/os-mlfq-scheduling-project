@@ -69,17 +69,18 @@ void Scheduler::runScheduler() {
     CPU cpu; //instantiate CPU 
 
     // deal with queue1 arrivals and RR 
-    while (processList.size() != 0) {
+    while (processList.size() != 0 || queue1.size() != 0) {
 
         if (clock == processList.front().getArrivalTime()) {
 
-            // KEEP TRACK OF WAIT TIME
             enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
         }
 
         if (queue1.size() != 0 && !cpu.isBusy(clock)) {
 
-            Process queue1CPUReturn = cpu.runTask(dequeueProcess(1), RRquantum, clock, 1); // send first arrived process to CPU
+            Process readyP = dequeueProcess(1);
+            readyP.addWaitTime(clock, 1); 
+            Process queue1CPUReturn = cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
     
             int extraTime = queue1CPUReturn.getRemainingTime();
             if (extraTime > 0) {
@@ -117,12 +118,12 @@ void Scheduler::runScheduler() {
             enqueueProcess(p, 3); 
         }
     }
-    // deal wtih queue2 and queue3
+    // deal with queue2 and queue3
     int q2_counter = 0; 
     cpu.resetFinishedTime(); 
 
     while (queue2.size() != 0 || queue3.size() != 0) {
-        
+        std::cout << clock << std::endl;
         // deal with q2 & q3 -> send sjf to cpu
 
         int chosenQueue; 
@@ -144,8 +145,9 @@ void Scheduler::runScheduler() {
         if (!cpu.isBusy(clock)) {
 
             Process p = dequeueProcess(chosenQueue);
+            p.addWaitTime(clock, chosenQueue);
 
-            Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock, chosenQueue); // send shortest job to CPU
+            Process returnedTask = cpu.runTask(p, p.getRemainingTime() , clock); // send shortest job to CPU
 
             //record wt and tt for completed processes
             wt.push_back(returnedTask.getWaitTime()); 
@@ -165,16 +167,12 @@ void Scheduler::printBenchMarks() {
 
     for (auto &time : wt) {
         aveWT += time;
-        std::cout << time << " "; 
     }
-    std::cout << std::endl;
     aveWT /= (float) totalCount;
 
     for (auto &time : tt) {
         aveTT += time;
-        std::cout << time << " ";
     }
-    std::cout  << std::endl;
     aveTT /= (float) totalCount;
 
     std::cout << "average wait time = " << aveWT << std::endl;

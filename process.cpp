@@ -24,16 +24,14 @@ void Process::decrementTimeRemaining(int burst) {
     timeRemaining -= burst;
 }
 
-void Process::addWaitTime(int cpuStartTime, int whichArrival) {
+void Process::addWaitTime(int clock, int whichArrival) {
 
     if (whichArrival == 1)
-        waitingTime += cpuStartTime - arrivalTime;
+        waitingTime += clock - arrivalTime;
     else
-        waitingTime += cpuStartTime - arrivalTime2;
+        waitingTime += clock - arrivalTime2;
 }
-void Process::updateWaitTime(int arrivalTime, int sentToCPUTime) {
-    waitingTime += sentToCPUTime - arrivalTime; 
-}
+
 int Process::getWaitTime() {
     return waitingTime; 
 }
