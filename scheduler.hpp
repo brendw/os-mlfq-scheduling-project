@@ -8,6 +8,8 @@
 #include "process.hpp"
 #include "cpu.hpp"
 
+enum queue { Q0=0, Q1=1, Q2=2, Q3=3, QC=4 }; 
+
 struct CompareProcesses{
     // want smallest burst_time at the top of the queue
     bool operator()(const Process p1, const Process p2 ) {
@@ -42,7 +44,8 @@ public:
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
-    void moveQCQueueToQ23(int);
+    void moveQCQueueToQ23(int); //after q1 RR completes, place the remaining processes on q2 and q3 split at a percentile 
+    int chooseQueue(); //determine whether a process from q2 or q3 gets sent to cpu
     void printBenchMarks();
 
 }; //class Scheduler

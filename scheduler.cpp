@@ -68,96 +68,83 @@ void Scheduler::runScheduler() {
     int clock = 0; //start the clock 
     CPU cpu; //instantiate CPU 
 
-    int tasksRemainingCount = processList.size();
+    int tasksRemaining = processList.size(); //loop with clock running until all processes have gone through q1 
 
     // deal with queue1 arrivals and RR 
-    while (tasksRemainingCount > 0 ) {
+    while (tasksRemaining > 0 ) {
         std::cout << clock;
 
+        // 1) enqueue any arriving processes onto queue1    
         while (processList.size() != 0 && clock == processList.front().getArrivalTime() ) {
 
-            enqueueProcess( dequeueProcess(0), 1 ); //dequeue from processlist and add to queue1 
+            enqueueProcess( dequeueProcess(Q0), Q1 ); //dequeue from processlist and add to queue1 
         }
 
-        // check if there's a return process from CPU
+        // 2) check if there's a returning process from CPU
         Process queue1CPUReturn = cpu.returnProcess(clock); //return from CPU;
         
-        if (queue1CPUReturn.getArrivalTime() != -1) {
+        if (queue1CPUReturn.getArrivalTime() != -1) { //valid process returned
             std::cout << "process returned from CPU" << std::endl;
             int extraTime = queue1CPUReturn.getRemainingTime();
             if (extraTime > 0) {
-                enqueueProcess( queue1CPUReturn, 4 ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
+                enqueueProcess( queue1CPUReturn, QC ); //processes that exceed RR quantum are placed on this to calculate ratio for q2 and q3
             }
             else {
                 //record wt and tt for completed processes
                 wt.push_back(queue1CPUReturn.getWaitTime()); 
                 tt.push_back(queue1CPUReturn.getFinishedTime()-queue1CPUReturn.getArrivalTime());    
             }
-            --tasksRemainingCount;
+            --tasksRemaining;
         } //else a process did not return 
 
-        // send ready process to CPU is free
+        // 3) send ready process to CPU if free
         if (queue1.size() != 0 && !cpu.isBusy(clock)) {
 
-            Process readyP = dequeueProcess(1);
-            readyP.addWaitTime(clock, 1); 
-            cpu.runTask(readyP, RRquantum, clock); // send first arrived process to CPU
+            Process readyP = dequeueProcess(Q1); // get process at front of q1 (RR/FIFO)
+            readyP.addWaitTime(clock, 1);       // record its wait time
+            cpu.runTask(readyP, RRquantum, clock); // send to CPU to run for the RR time quantum 
         } 
 
         clock++;
         std::cout<<std::endl;
-    } // while tasksRemain
-    --clock;
-    //find percentile of qc_queue (already sorted) and place processes onto queues2&3
-    moveQCQueueToQ23(clock);
+    } // while tasksRemaining
+
+    --clock; //clock is incremented at last loop when q1 completes, decrement it
+
+    moveQCQueueToQ23(clock);  //find percentile of qc_queue (already sorted) and place processes onto queues2&3
 
     // deal with queue2 and queue3
-    tasksRemainingCount = queue2.size() + queue3.size(); 
-    int q2_counter = 0; 
+    tasksRemaining = queue2.size() + queue3.size(); //loop with clock running until all processes have gone through q2/q3
 
-    while (tasksRemainingCount) { // deal with q2 & q3 -> send sjf to cpu
+    while (tasksRemaining) { 
         std::cout << clock; 
         
-        // check if there's a return process from CPU
+        // 1) check if there's a return process from CPU
         Process returnP = cpu.returnProcess(clock); //return from CPU;
         
-        if (returnP.getArrivalTime() != -1) {
+        if (returnP.getArrivalTime() != -1) { //valid process returned
             std::cout << "process returned from CPU" << std::endl;
             //record wt and tt for completed processes
             wt.push_back(returnP.getWaitTime()); 
             tt.push_back(returnP.getFinishedTime()-returnP.getArrivalTime());    
-            --tasksRemainingCount;
+            --tasksRemaining;
         } //else a process did not return 
 
-        // pick whether process comes from q2 or q3 for cpu
-        int chosenQueue;
-
-        // send ready process to CPU if free
+        
+        // 2) send ready process to CPU if free
         if ((queue2.size() != 0 || queue3.size() ) && !cpu.isBusy(clock)) {
 
-            if (queue2.size() == 0) {
-                chosenQueue = 3;
-            }
-            else if (queue3.size() == 0) {
-                chosenQueue = 2; 
-            }
-            else if (q2_counter < 3) {
-                chosenQueue = 2;
-                ++q2_counter;
-            }
-            else if (q2_counter == 3) {
-                chosenQueue = 3;
-                q2_counter = 0; 
-            } 
+            int chosenQueue = chooseQueue(); // pick whether process comes from q2 or q3 for cpu
 
-            Process readyP = dequeueProcess(chosenQueue);
-            readyP.addWaitTime(clock, chosenQueue);
+            Process readyP = dequeueProcess(chosenQueue); //get process at front of sorted by time remaining queue
+            readyP.addWaitTime(clock, chosenQueue);       //record its wait time
 
-            cpu.runTask(readyP, readyP.getRemainingTime() , clock); // send shortest job to CPU
+            cpu.runTask(readyP, readyP.getRemainingTime() , clock); // send shortest job to CPU and run to completion 
         }
+
         clock++; 
         std::cout<<std::endl;
-    } //end tasksRemaining on q2/q3
+    } //end tasksRemaininging on q2/q3
 } //end runScheduler
 
 void Scheduler::moveQCQueueToQ23(int clock){
@@ -180,11 +167,33 @@ void Scheduler::moveQCQueueToQ23(int clock){
         }
 
         for (int i = 0 ; i<qc_queue.size() ; i++) { //whatever is left on qc_queue goes to queue3
-            Process p = dequeueProcess(4);
+            Process p = dequeueProcess(QC);
             p.setSecondArrivalTime(clock);
-            enqueueProcess(p, 3); 
+            enqueueProcess(p, Q3); 
         }
     }
+}
+int Scheduler::chooseQueue() {
+
+    static int q2_counter = 0; 
+
+    int chosenQueue;
+    if (queue2.size() == 0) {
+        chosenQueue = 3;
+    }
+    else if (queue3.size() == 0) {
+        chosenQueue = 2; 
+    }
+    else if (q2_counter < 3) {
+        chosenQueue = 2;
+        ++q2_counter;
+    }
+    else if (q2_counter == 3) {
+        chosenQueue = 3;
+        q2_counter = 0; 
+    } 
+    return chosenQueue;
+
 }
 
 void Scheduler::printBenchMarks() {
