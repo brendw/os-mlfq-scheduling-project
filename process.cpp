@@ -4,6 +4,7 @@ Process::Process() {};
 
 Process::Process(int arrival, int burst) {
     arrivalTime = arrival;
+
     totalBurstTime = burst;
     timeRemaining = burst;
     waitingTime = 0;
@@ -36,6 +37,10 @@ void Process::addWaitTime(int clock, int whichArrival) {
         waitingTime += clock - arrivalTime2;
 }
 
+void Process::addWaitTimeNew(int clock) {
+    waitingTime += clock - arrivalTime;
+}
+
 int Process::getWaitTime() {
     return waitingTime; 
 }
@@ -55,4 +60,20 @@ void Process::setSecondArrivalTime(int clock) { //when processes are requeued to
 }
 int Process::getSecondArrivalTime() {
     return arrivalTime2;
+}
+
+void Process::setArrivalTimeNew(int clock) {
+    arrivalTime = clock;
+}
+
+int Process::getTotalBurstTime() {
+    return totalBurstTime;
+}
+
+int Process::getPriorityLevel() {
+    return priorityLevel;
+}
+
+void Process::setPriorityLevel(int level) {
+    priorityLevel = level;
 }

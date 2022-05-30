@@ -1,24 +1,32 @@
 #include "scheduler.hpp"
 #include <iostream>
 
-Scheduler::Scheduler(std::vector<int> arrival_times, std::vector<int> burst_times) { //constructor
-    // queues are already empty
-    RRquantum = 10; 
-    qc = 0;
-    arrivalTimes = arrival_times;
-    burstTimes = burst_times;
+//Scheduler::Scheduler(std::vector<int> arrival_times, std::vector<int> burst_times) { //constructor
+//    // queues are already empty
+//    RRquantum = 10; 
+//    qc = 0;
+//    arrivalTimes = arrival_times;
+//    burstTimes = burst_times;
+//
+//    createProcessesList(arrival_times, burst_times); 
+//}
 
-    createProcessesList(arrival_times, burst_times); 
+Scheduler::Scheduler(std::vector<Process> processList, Policy* p) {
+    this->processList = processList;
+    this->schedulePolicy = p;
+
+    this->RRquantum = p->getFirstQuantum();
+    this->qc = 0;
 }
 
-void Scheduler::createProcessesList(std::vector<int> arrival_times, std::vector<int> burst_times) {
-
-    for (int i = 0 ; i < arrival_times.size() ; i++) {
-
-        Process p(arrival_times[i], burst_times[i]); //create process with time attributes
-        processList.push(p);                   //add to list 
-    }
-}
+//void Scheduler::createProcessesList(std::vector<int> arrival_times, std::vector<int> burst_times) {
+//
+//    for (int i = 0 ; i < arrival_times.size() ; i++) {
+//
+//        Process p(arrival_times[i], burst_times[i]); //create process with time attributes
+//        processList.push(p);                   //add to list 
+//    }
+//}
 
 void Scheduler::enqueueProcess(Process p, int queueNumber) {
     switch (queueNumber) {
@@ -41,7 +49,8 @@ Process Scheduler::dequeueProcess(int currentQueue) {
     switch (currentQueue) {
         case 0:
             removedProcess = processList.front();
-            processList.pop();
+            //processList.pop();
+            processList.erase(processList.begin());
             break;
         case 1:
             removedProcess = queue1.front();
@@ -226,6 +235,66 @@ void Scheduler::runScheduler() {
     }
 } //end runScheduler
 
+void Scheduler::runSchedulerNew() {
+    int clock = 0; //start the clock 
+    CPU cpu; //instantiate CPU
+
+    int tasksRemainingCount = processList.size();
+
+    while (tasksRemainingCount > 0) { //we'll find some ending condition in a bit
+        for (Process p : processList) { //search through the process list for any processes that are arriving
+            if (p.getArrivalTime() == clock) {
+                std::cout << "A process has arrived and been inserted into queue 1 at clock " << clock << std::endl;
+                enqueueProcess(p, 1);
+            }
+        }
+
+        //if the cpu is busy, just let it do its shit
+        if (cpu.isBusy()) {
+            //run the task
+            cpu.runTask(clock);
+
+            //check if the current task processing has ended
+            if (cpu.endOfTask()) {
+                Process returnedProcess = cpu.relinquishProcess();
+                //check if the task is done
+                bool isDone = returnedProcess.getFinished();
+                if (isDone) {
+                    std::cout << "Returned process completed at clock " << clock << std::endl;
+                    returnedProcess.setFinishedTime(clock);
+                    wt.push_back(returnedProcess.getWaitTime());
+                    tt.push_back(returnedProcess.getFinishedTime());
+                    tasksRemainingCount--;
+                }
+                else {
+                    //push this process somewhere else
+                    int newPriority = schedulePolicy->getNewPriorityForProcess(returnedProcess);
+                    returnedProcess.setPriorityLevel(newPriority);
+                    returnedProcess.setArrivalTimeNew(clock);
+                    std::cout << "Returned process being inserted into queue " << newPriority << " at clock " << clock << std::endl;
+                    enqueueProcess(returnedProcess, newPriority);
+                }
+            }
+        }
+        else {
+            QueueStatus status = getQueueStatus();
+            int nextQueueNumber = schedulePolicy->getNextQueue(status);
+            Process readyP = dequeueProcess(nextQueueNumber);
+            //readyP.addWaitTime(clock, 1); TODO: fix wait time
+            readyP.addWaitTimeNew(clock);
+            //feed this process to the cpu
+            int readyProcessPriority = readyP.getPriorityLevel();
+            //int quantumFromPolicy = schedulePolicy.getFirstQuantum(readyProcessPriority);
+            int quantumFromPolicy = schedulePolicy->getQuantum(readyProcessPriority);
+            cpu.insertTask(readyP, quantumFromPolicy);
+            std::cout << "Inserting a new process at clock " << clock << std::endl;
+            cpu.runTask(clock);
+        }
+
+        clock++;
+    }
+}
+
 void Scheduler::moveQCQueueToQ23(int clock){
 
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
@@ -273,4 +342,13 @@ void Scheduler::printBenchMarks() {
     std::cout << "average wait time = " << aveWT << std::endl;
     std::cout << "average turnaround time = " << aveTT << std::endl;
 
+}
+
+QueueStatus Scheduler::getQueueStatus() {
+    int firstQueueLength = queue1.size();
+    int secondQueueLength = queue2.size();
+    int thirdQueueLength = queue3.size();
+
+    QueueStatus returnValue(firstQueueLength, secondQueueLength, thirdQueueLength);
+    return returnValue;
 }

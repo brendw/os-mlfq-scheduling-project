@@ -7,6 +7,8 @@
 #include <functional>
 #include "process.hpp"
 #include "cpu.hpp"
+#include "queuestatus.hpp"
+#include "policy.hpp"
 
 struct CompareProcesses{
     // want smallest burst_time at the top of the queue
@@ -15,7 +17,9 @@ struct CompareProcesses{
     }
 };
 
-class Scheduler { 
+class Scheduler {
+
+    Policy* schedulePolicy;
 
     // MLFQ
     std::queue<Process> queue1; // RR (FIFO but only 1 turn)
@@ -29,21 +33,25 @@ class Scheduler {
     std::vector<int> arrivalTimes;
     std::vector<int> burstTimes;
     
-    void createProcessesList(std::vector<int>, std::vector<int>);
-    std::queue<Process> processList;
+    //void createProcessesList(std::vector<int>, std::vector<int>);
+    //std::queue<Process> processList;
+    std::vector<Process> processList;
+    //Policy schedulePolicy;
 
     // benchmarks 
     std::vector<int> wt; //wait times = sentToCPUTime - arrival 
     std::vector<int> tt; //turnaround times = wt+burst time
 
-
 public:
     Scheduler(std::vector<int>, std::vector<int>); //constructor
+    Scheduler(std::vector<Process>, Policy*);
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
+    void runSchedulerNew();
     void moveQCQueueToQ23(int);
     void printBenchMarks();
+    QueueStatus getQueueStatus();
 
 }; //class Scheduler
 
