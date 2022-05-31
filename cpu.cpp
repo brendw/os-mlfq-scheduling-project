@@ -8,9 +8,12 @@ CPU::CPU() {
 
 void CPU::runTask(Process p, int quantum, int currentClock) {
 
-    currentProcess = p; 
+    // takes a process and the time it is allowed to run for
+    // takes current click tick to calculate at which clock tick in future the process will be done
+
+    currentProcess = p; // set p as CPU's attribute 
     int remainingTime = p.getRemainingTime();
-    currentlyBusy = true;
+    currentlyBusy = true; // CPU now busy with a process
 
     if (remainingTime > quantum) {
         currentProcess.decrementTimeRemaining(quantum);
@@ -41,12 +44,12 @@ void CPU::resetFinishedTime() {
 
 Process CPU::returnProcess(int returnTime) {
     if (finishedTime == returnTime) {
-        currentlyBusy = false;
+        currentlyBusy = false; //CPU no longer busy now that process completed
         resetFinishedTime();
         return currentProcess;
     }
     else {
-        Process p(-1, -1);
+        Process p(-1, -1);  //current process not complete, return a null process 
         return p; 
     }
 }

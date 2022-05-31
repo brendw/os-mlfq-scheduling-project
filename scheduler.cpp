@@ -157,13 +157,13 @@ void Scheduler::moveQCQueueToQ23(int clock){
 
         for (int i = 0 ; i <= percentile_index ; i++ ) {
             
-            Process p = dequeueProcess(4);
+            Process p = dequeueProcess(QC);
 
             if ( i == percentile_index) {
                 percentile_time = p.getRemainingTime();
             }
             p.setSecondArrivalTime(clock);
-            enqueueProcess( p , 2 ); //pop from qc_queue and enqueue on queue2
+            enqueueProcess( p , Q2 ); //pop from qc_queue and enqueue on queue2
         }
 
         for (int i = 0 ; i<qc_queue.size() ; i++) { //whatever is left on qc_queue goes to queue3
@@ -175,22 +175,24 @@ void Scheduler::moveQCQueueToQ23(int clock){
 }
 int Scheduler::chooseQueue() {
 
+    int ratio = 4; // ratio is X:1 for Q2 to Q3
+
     static int q2_counter = 0; 
 
     int chosenQueue;
-    if (queue2.size() == 0) {
+    if (queue2.size() == 0) { //Q2 is empty so place in Q3
         chosenQueue = 3;
     }
-    else if (queue3.size() == 0) {
+    else if (queue3.size() == 0) { //Q3 is empty so place in Q2
         chosenQueue = 2; 
     }
-    else if (q2_counter < 3) {
+    else if (q2_counter < ratio) { //ratio placed in Q2
         chosenQueue = 2;
         ++q2_counter;
     }
-    else if (q2_counter == 3) {
+    else if (q2_counter == ratio) { //ratio placed in Q3 
         chosenQueue = 3;
-        q2_counter = 0; 
+        q2_counter = 0; //reset counter
     } 
     return chosenQueue;
 
@@ -214,5 +216,6 @@ void Scheduler::printBenchMarks() {
 
     std::cout << "average wait time = " << aveWT << std::endl;
     std::cout << "average turnaround time = " << aveTT << std::endl;
+    std::cout << std::endl;
 
 }
