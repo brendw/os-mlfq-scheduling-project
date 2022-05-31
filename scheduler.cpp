@@ -244,7 +244,8 @@ void Scheduler::runSchedulerNew() {
     while (tasksRemainingCount > 0) { //we'll find some ending condition in a bit
         for (Process p : processList) { //search through the process list for any processes that are arriving
             if (p.getArrivalTime() == clock) {
-                std::cout << "A process has arrived and been inserted into queue 1 at clock " << clock << std::endl;
+                std::cout << "A process " << p.getName() << " has arrived and been inserted into queue 1 at clock " << clock << std::endl;
+                p.setPriorityLevel(1);
                 enqueueProcess(p, 1);
             }
         }
@@ -260,7 +261,7 @@ void Scheduler::runSchedulerNew() {
                 //check if the task is done
                 bool isDone = returnedProcess.getFinished();
                 if (isDone) {
-                    std::cout << "Returned process completed at clock " << clock << std::endl;
+                    std::cout << "Returned process " << returnedProcess.getName() << " completed at clock " << clock << std::endl;
                     returnedProcess.setFinishedTime(clock);
                     wt.push_back(returnedProcess.getWaitTime());
                     tt.push_back(returnedProcess.getFinishedTime());
@@ -271,7 +272,7 @@ void Scheduler::runSchedulerNew() {
                     int newPriority = schedulePolicy->getNewPriorityForProcess(returnedProcess);
                     returnedProcess.setPriorityLevel(newPriority);
                     returnedProcess.setArrivalTimeNew(clock);
-                    std::cout << "Returned process being inserted into queue " << newPriority << " at clock " << clock << std::endl;
+                    std::cout << "Returned process " << returnedProcess.getName() << " being inserted into queue " << newPriority << " at clock " << clock << std::endl;
                     enqueueProcess(returnedProcess, newPriority);
                 }
             }
@@ -287,7 +288,7 @@ void Scheduler::runSchedulerNew() {
             //int quantumFromPolicy = schedulePolicy.getFirstQuantum(readyProcessPriority);
             int quantumFromPolicy = schedulePolicy->getQuantum(readyProcessPriority);
             cpu.insertTask(readyP, quantumFromPolicy);
-            std::cout << "Inserting a new process at clock " << clock << std::endl;
+            std::cout << "Inserting a new process " << readyP.getName() << " at clock " << clock << std::endl;
             cpu.runTask(clock);
         }
 

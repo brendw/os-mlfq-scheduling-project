@@ -27,14 +27,14 @@ void CPU::insertTask(Process newProcess, int quantumAvailable) {
     this->currentProcess = newProcess;
     this->hasProcess = true;
     this->remainingQuantum = quantumAvailable;
-    std::cout << "CPU receives process with remaining burst of " << currentProcess.getRemainingTime() << " and time quantum of " << remainingQuantum << std::endl;
+    //std::cout << "CPU receives process with remaining burst of " << currentProcess.getRemainingTime() << " and time quantum of " << remainingQuantum << std::endl;
 }
 
 void CPU::runTask(int currentClock) { //i guess we have the current clock for debug purposes?
     this->currentProcess.decrementTimeRemaining(1);
     this->remainingQuantum--;
 
-    std::cout << "Running process at clock " << currentClock << ", remaining processing time: " << currentProcess.getRemainingTime() << ", remaining quantum: " << remainingQuantum << std::endl;
+    //std::cout << "Running process at clock " << currentClock << ", remaining processing time: " << currentProcess.getRemainingTime() << ", remaining quantum: " << remainingQuantum << std::endl;
 }
 
 bool CPU::endOfTask() {

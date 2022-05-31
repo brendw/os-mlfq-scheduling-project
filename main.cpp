@@ -7,25 +7,32 @@
 int main(void) {
 
     std::ifstream inputfile("input.txt");
+    std::vector<std::string> processNames;
     std::vector<int> arrivalTimes;
     std::vector<int> burstTimes;
-    /*char line[256];*/
     int index = 0;
     std::string token;
     if (inputfile.is_open()) {
         while (inputfile >> token) {
             std::cout << token << std::endl;
-            int value = std::stoi(token);
-            
             if (index == 0) {
-                std::cout << "Pushing into arrivalTimes: " << value << std::endl;
-                arrivalTimes.push_back(value);
+                std::cout << "Pushing into processNames: " << token << std::endl;
+                processNames.push_back(token);
             }
             else {
-                std::cout << "Pushing into burstTimes: " << value << std::endl;
-                burstTimes.push_back(value);
+                int value = std::stoi(token);
+
+                if (index == 1) {
+                    std::cout << "Pushing into arrivalTimes: " << value << std::endl;
+                    arrivalTimes.push_back(value);
+                }
+                else {
+                    std::cout << "Pushing into burstTimes: " << value << std::endl;
+                    burstTimes.push_back(value);
+                }
             }
-            index = (index + 1) % 2;
+            
+            index = (index + 1) % 3;
         }
 
         inputfile.close();
@@ -43,12 +50,13 @@ int main(void) {
     std::vector<Process> processList;
 
     for (int i = 0; i < arrivalTimes.size(); i++) {
-        processList.push_back(Process(arrivalTimes.at(i), burstTimes.at(i)));
+        processList.push_back(Process(processNames.at(i), arrivalTimes.at(i), burstTimes.at(i)));
     }
 
     std::cout << "Process list: " << std::endl;
     for (std::vector<Process>::iterator it = processList.begin(); it != processList.end(); it++) {
-        std::cout << "dodo" << std::endl;
+        Process p = *it;
+        std::cout << p.getName() << " " << p.getArrivalTime() << " " << p.getTotalBurstTime() << std::endl;
     }
 
     // replace with reading a file and importing to these vectors
@@ -56,7 +64,8 @@ int main(void) {
     std::vector<int> burst_times {8,21,133,39,67,114,54};
 
     //PaperPolicy selectedPolicy(processList);
-    Policy* selectedPolicy = new PaperPolicy(processList);
+    //Policy* selectedPolicy = new PaperPolicy(processList);
+    Policy* selectedPolicy = new BasePolicy(processList);
 
     //Scheduler scheduler(arrival_times, burst_times);
     Scheduler scheduler(processList, selectedPolicy);

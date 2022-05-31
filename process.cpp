@@ -2,7 +2,8 @@
 
 Process::Process() {};
 
-Process::Process(int arrival, int burst) {
+Process::Process(std::string name, int arrival, int burst) {
+    this->name = name;
     arrivalTime = arrival;
 
     totalBurstTime = burst;
@@ -17,6 +18,10 @@ Process::Process(int arrival, int burst) {
 //     waitingTime = p.waitingTime;
 //     turnaroundTime = p.turnaroundTime;
 // }
+
+std::string Process::getName() {
+    return name;
+}
 
 int Process::getRemainingTime(){
     return timeRemaining;

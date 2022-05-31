@@ -9,6 +9,7 @@ protected:
 	std::vector<Process> processList;
 	int firstQueueQuantum;
 	int otherQueueQuantum;
+	std::vector<int> queueQuantums;
 
 public:
 	Policy();
@@ -37,12 +38,18 @@ class BasePolicy : public Policy {
 
 public:
 	BasePolicy(std::vector<Process>);
-	int getNextQueue();
+	int getNextQueue(QueueStatus);
+	int getFirstQuantum();
+	int getQuantum(int);
+	int getNewPriorityForProcess(Process);
 };
 
 class OurPolicy : public Policy {
 
 public:
 	OurPolicy(std::vector<Process>);
-	int getNextQueue();
+	int getNextQueue(QueueStatus);
+	int getFirstQuantum();
+	int getQuantum(int);
+	int getNewPriorityForProcess(Process);
 };
