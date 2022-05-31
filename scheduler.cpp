@@ -1,10 +1,14 @@
 #include "scheduler.hpp"
 #include <iostream>
 
-Scheduler::Scheduler(std::vector<int> arrival_times, std::vector<int> burst_times) { //constructor
+Scheduler::Scheduler(std::vector<int> arrival_times, std::vector<int> burst_times, 
+                    int quantum, int percentile_num, int percentile_denom, int ratio) { //constructor
     // queues are already empty
-    RRquantum = 10; 
-    qc = 0;
+    RRquantum = quantum; 
+    percentile_numerator = percentile_num;
+    percentile_denominator = percentile_denom;
+    queue_ratio = ratio;
+
     arrivalTimes = arrival_times;
     burstTimes = burst_times;
 
@@ -150,7 +154,7 @@ void Scheduler::runScheduler() {
 void Scheduler::moveQCQueueToQ23(int clock){
 
     //find percentile of qc_queue (already sorted) and place processes onto queues2&3
-    int percentile_index = qc_queue.size() * 3/4; 
+    int percentile_index = qc_queue.size() * percentile_numerator / percentile_denominator; 
     int percentile_time;
 
     if (qc_queue.size() != 0) {
@@ -175,7 +179,7 @@ void Scheduler::moveQCQueueToQ23(int clock){
 }
 int Scheduler::chooseQueue() {
 
-    int ratio = 4; // ratio is X:1 for Q2 to Q3
+    // ratio is X:1 for Q2 to Q3
 
     static int q2_counter = 0; 
 
@@ -186,11 +190,11 @@ int Scheduler::chooseQueue() {
     else if (queue3.size() == 0) { //Q3 is empty so place in Q2
         chosenQueue = 2; 
     }
-    else if (q2_counter < ratio) { //ratio placed in Q2
+    else if (q2_counter < queue_ratio) { //ratio placed in Q2
         chosenQueue = 2;
         ++q2_counter;
     }
-    else if (q2_counter == ratio) { //ratio placed in Q3 
+    else if (q2_counter == queue_ratio) { //ratio placed in Q3 
         chosenQueue = 3;
         q2_counter = 0; //reset counter
     } 
@@ -200,7 +204,7 @@ int Scheduler::chooseQueue() {
 
 void Scheduler::printBenchMarks() {
 
-    int aveWT, aveTT;
+    int aveWT = 0, aveTT = 0;
 
     int totalCount = wt.size();
 

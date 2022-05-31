@@ -23,10 +23,15 @@ class Scheduler {
     std::queue<Process> queue1; // RR (FIFO but only 1 turn)
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue2; // SJF
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue3; // SJF
-    int RRquantum;
-    int qc; 
+    int qc = 0;
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> qc_queue; //processes that exceed RR timequantum
     
+    int RRquantum;
+    int percentile_numerator;
+    int percentile_denominator;
+    int queue_ratio;
+
+
     // arriving processes to be scheduled and run
     std::vector<int> arrivalTimes;
     std::vector<int> burstTimes;
@@ -40,7 +45,7 @@ class Scheduler {
 
 
 public:
-    Scheduler(std::vector<int>, std::vector<int>); //constructor
+    Scheduler(std::vector<int>, std::vector<int>, int, int, int, int); //constructor
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
