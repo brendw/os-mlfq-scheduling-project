@@ -43,8 +43,8 @@ int main(void) {
     }
     
     std::cout << "arrivalTimes.size: " << arrivalTimes.size() << std::endl;
-    std::string thing;
-    std::cin >> thing;
+    //std::string thing;
+    //std::cin >> thing;
     //return 0;
 
     std::vector<Process> processList;
@@ -60,12 +60,12 @@ int main(void) {
     }
 
     // replace with reading a file and importing to these vectors
-    std::vector<int> arrival_times {0,2,3,8,19,33,34};
-    std::vector<int> burst_times {8,21,133,39,67,114,54};
+    //std::vector<int> arrival_times {0,2,3,8,19,33,34};
+    //std::vector<int> burst_times {8,21,133,39,67,114,54};
 
     //PaperPolicy selectedPolicy(processList);
-    //Policy* selectedPolicy = new PaperPolicy(processList);
-    Policy* selectedPolicy = new BasePolicy(processList);
+    Policy* selectedPolicy = new PaperPolicy(processList);
+    //Policy* selectedPolicy = new BasePolicy(processList);
 
     //Scheduler scheduler(arrival_times, burst_times);
     Scheduler scheduler(processList, selectedPolicy);
