@@ -280,7 +280,8 @@ void Scheduler::runSchedulerNew() {
                     //push this process somewhere else
                     int newPriority = schedulePolicy->getNewPriorityForProcess(returnedProcess);
                     returnedProcess.setPriorityLevel(newPriority);
-                    returnedProcess.setArrivalTimeNew(clock);
+                    //returnedProcess.setArrivalTimeNew(clock);
+                    returnedProcess.setSecondArrivalTime(clock);
                     std::cout << "Returned process " << returnedProcess.getName() << " being inserted into queue " << newPriority << " at clock " << clock << std::endl;
                     enqueueProcess(returnedProcess, newPriority);
                 }
@@ -293,7 +294,13 @@ void Scheduler::runSchedulerNew() {
             int nextQueueNumber = schedulePolicy->getNextQueue(status);
             Process readyP = dequeueProcess(nextQueueNumber);
             //readyP.addWaitTime(clock, 1); TODO: fix wait time
-            readyP.addWaitTimeNew(clock);
+            if (nextQueueNumber == 1) {
+                readyP.addWaitTime(clock, 1);
+            }
+            else {
+                readyP.addWaitTime(clock, 2);
+            }
+            //readyP.addWaitTimeNew(clock);
             //feed this process to the cpu
             int readyProcessPriority = readyP.getPriorityLevel();
             //int quantumFromPolicy = schedulePolicy.getFirstQuantum(readyProcessPriority);
