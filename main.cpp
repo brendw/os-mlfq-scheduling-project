@@ -14,20 +14,20 @@ int main(void) {
     std::string token;
     if (inputfile.is_open()) {
         while (inputfile >> token) {
-            std::cout << token << std::endl;
+            //std::cout << token << std::endl;
             if (index == 0) {
-                std::cout << "Pushing into processNames: " << token << std::endl;
+                //std::cout << "Pushing into processNames: " << token << std::endl;
                 processNames.push_back(token);
             }
             else {
                 int value = std::stoi(token);
 
                 if (index == 1) {
-                    std::cout << "Pushing into arrivalTimes: " << value << std::endl;
+                    //std::cout << "Pushing into arrivalTimes: " << value << std::endl;
                     arrivalTimes.push_back(value);
                 }
                 else {
-                    std::cout << "Pushing into burstTimes: " << value << std::endl;
+                    //std::cout << "Pushing into burstTimes: " << value << std::endl;
                     burstTimes.push_back(value);
                 }
             }
@@ -42,9 +42,9 @@ int main(void) {
         return 1;
     }
     
-    std::cout << "arrivalTimes.size: " << arrivalTimes.size() << std::endl;
-    std::string thing;
-    std::cin >> thing;
+    //std::cout << "arrivalTimes.size: " << arrivalTimes.size() << std::endl;
+    //std::string thing;
+    //std::cin >> thing;
     //return 0;
 
     std::vector<Process> processList;
@@ -64,8 +64,8 @@ int main(void) {
     std::vector<int> burst_times {8,21,133,39,67,114,54};
 
     //PaperPolicy selectedPolicy(processList);
-    //Policy* selectedPolicy = new PaperPolicy(processList);
-    Policy* selectedPolicy = new BasePolicy(processList);
+    Policy* selectedPolicy = new PaperPolicy(processList);
+    //Policy* selectedPolicy = new BasePolicy(processList);
 
     //Scheduler scheduler(arrival_times, burst_times);
     Scheduler scheduler(processList, selectedPolicy);

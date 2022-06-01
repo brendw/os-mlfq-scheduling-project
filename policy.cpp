@@ -46,6 +46,14 @@ int PaperPolicy::getNextQueue(QueueStatus status) {
 		return 1;
 	}
 
+	if (status.getSecondQueueCount() == 0 && status.getThirdQueueCount() > 0) {
+		return 3;
+	}
+
+	if (status.getThirdQueueCount() == 0 && status.getSecondQueueCount() > 0) {
+		return 2;
+	}
+
 	if (agingFactor >= 3 && status.getThirdQueueCount() > 0) {
 		agingFactor = 0;
 		return 3;

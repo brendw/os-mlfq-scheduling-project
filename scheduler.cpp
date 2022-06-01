@@ -96,6 +96,7 @@ void Scheduler::runScheduler() {
 
             //check if the current task processing has ended
             if (cpu.endOfTask()) {
+                //std::cout << "Task has ended" << std::endl;
                 Process returnedProcess = cpu.relinquishProcess();
                 tasksRemainingCount--;
 
@@ -114,6 +115,7 @@ void Scheduler::runScheduler() {
                     enqueueProcess(returnedProcess, 4);
                 }
             }
+            //else std::cout << "Task has not ended" << std::endl;
         } else if (queue1.size() != 0) { //if there are tasks to run in queue 1, grab one and feed it to the cpu
             //get the next task
             Process readyP = dequeueProcess(1);
@@ -240,8 +242,10 @@ void Scheduler::runSchedulerNew() {
     CPU cpu; //instantiate CPU
 
     int tasksRemainingCount = processList.size();
+    bool ranTaskOnClock = false;
 
     while (tasksRemainingCount > 0) { //we'll find some ending condition in a bit
+        ranTaskOnClock = false;
         for (Process p : processList) { //search through the process list for any processes that are arriving
             if (p.getArrivalTime() == clock) {
                 std::cout << "A process " << p.getName() << " has arrived and been inserted into queue 1 at clock " << clock << std::endl;
@@ -251,12 +255,17 @@ void Scheduler::runSchedulerNew() {
         }
 
         //if the cpu is busy, just let it do its shit
+
         if (cpu.isBusy()) {
             //run the task
-            cpu.runTask(clock);
+            if (!cpu.endOfTask()) {
+                cpu.runTask(clock);
+                ranTaskOnClock = true;
+            }
 
             //check if the current task processing has ended
             if (cpu.endOfTask()) {
+                //std::cout << "Task has ended" << std::endl;
                 Process returnedProcess = cpu.relinquishProcess();
                 //check if the task is done
                 bool isDone = returnedProcess.getFinished();
@@ -276,8 +285,10 @@ void Scheduler::runSchedulerNew() {
                     enqueueProcess(returnedProcess, newPriority);
                 }
             }
+            //else std::cout << "Task has not ended" << std::endl;
         }
-        else {
+        //else {
+        if (!cpu.isBusy() && tasksRemainingCount > 0 && !ranTaskOnClock) {
             QueueStatus status = getQueueStatus();
             int nextQueueNumber = schedulePolicy->getNextQueue(status);
             Process readyP = dequeueProcess(nextQueueNumber);
@@ -290,8 +301,8 @@ void Scheduler::runSchedulerNew() {
             cpu.insertTask(readyP, quantumFromPolicy);
             std::cout << "Inserting a new process " << readyP.getName() << " at clock " << clock << std::endl;
             cpu.runTask(clock);
+            //insertedTaskOnClock = true;
         }
-
         clock++;
     }
 }
