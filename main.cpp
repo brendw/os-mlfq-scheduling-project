@@ -14,20 +14,16 @@ int main(void) {
     std::string token;
     if (inputfile.is_open()) {
         while (inputfile >> token) {
-            //std::cout << token << std::endl;
             if (index == 0) {
-                //std::cout << "Pushing into processNames: " << token << std::endl;
                 processNames.push_back(token);
             }
             else {
                 int value = std::stoi(token);
 
                 if (index == 1) {
-                    //std::cout << "Pushing into arrivalTimes: " << value << std::endl;
                     arrivalTimes.push_back(value);
                 }
                 else {
-                    //std::cout << "Pushing into burstTimes: " << value << std::endl;
                     burstTimes.push_back(value);
                 }
             }
@@ -41,11 +37,6 @@ int main(void) {
         std::cout << "Error reading from file" << std::endl;
         return 1;
     }
-    
-    //std::cout << "arrivalTimes.size: " << arrivalTimes.size() << std::endl;
-    //std::string thing;
-    //std::cin >> thing;
-    //return 0;
 
     std::vector<Process> processList;
 
@@ -59,17 +50,26 @@ int main(void) {
         std::cout << p.getName() << " " << p.getArrivalTime() << " " << p.getTotalBurstTime() << std::endl;
     }
 
-    // replace with reading a file and importing to these vectors
-    //std::vector<int> arrival_times {0,2,3,8,19,33,34};
-    //std::vector<int> burst_times {8,21,133,39,67,114,54};
+    int policyToUse = 1; //change to 0 to use the original paper implementation, 1 for the baseline implementation, 2 for custom implementation
+    Policy* selectedPolicy;
 
-    //PaperPolicy selectedPolicy(processList);
-    Policy* selectedPolicy = new PaperPolicy(processList);
-    //Policy* selectedPolicy = new BasePolicy(processList);
+    switch (policyToUse) {
+    case 0:
+        selectedPolicy = new PaperPolicy(processList);
+        break;
+    case 1:
+        selectedPolicy = new BasePolicy(processList);
+        break;
+    case 2:
+        selectedPolicy = new OurPolicy(processList);
+        break;
+    default:
+        std::cout << "Error determing policy to use" << std::endl;
+        return 1;
+    }
 
-    //Scheduler scheduler(arrival_times, burst_times);
     Scheduler scheduler(processList, selectedPolicy);
-    scheduler.runSchedulerNew();
+    scheduler.runScheduler();
     scheduler.printBenchMarks(); 
 
     std::cout << "Press any key to exit..." << std::endl;

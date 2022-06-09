@@ -46,6 +46,9 @@ public:
 
 class OurPolicy : public Policy {
 
+	std::vector<Process> mainProcesses;
+	int agingFactor;
+
 public:
 	OurPolicy(std::vector<Process>);
 	int getNextQueue(QueueStatus);

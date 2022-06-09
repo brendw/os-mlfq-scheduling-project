@@ -24,6 +24,7 @@ class Scheduler {
     // MLFQ
     std::queue<Process> queue1; // RR (FIFO but only 1 turn)
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue2; // SJF
+    //std::queue<Process> queue2; // RR for base policy
     std::priority_queue<Process, std::vector<Process>, CompareProcesses> queue3; // SJF
     int RRquantum;
     int qc; 
@@ -43,13 +44,10 @@ class Scheduler {
     std::vector<int> tt; //turnaround times = wt+burst time
 
 public:
-    Scheduler(std::vector<int>, std::vector<int>); //constructor
     Scheduler(std::vector<Process>, Policy*);
     void enqueueProcess(Process, int);
     Process dequeueProcess(int);
     void runScheduler();
-    void runSchedulerNew();
-    void moveQCQueueToQ23(int);
     void printBenchMarks();
     QueueStatus getQueueStatus();
 

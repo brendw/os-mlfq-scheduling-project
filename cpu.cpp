@@ -6,23 +6,6 @@ CPU::CPU() {
     hasProcess = false;
 }
 
-//Process CPU::runTask(Process p, int quantum, int currentClock) {
-//
-//    int remainingTime = p.getRemainingTime();
-//
-//    if (remainingTime > quantum) {
-//        p.decrementTimeRemaining(quantum);
-//        finishedTime = currentClock + quantum;
-//    }
-//    else {
-//        p.decrementTimeRemaining(remainingTime); //remaining is 0 
-//        finishedTime = currentClock + remainingTime;
-//    }
-//    p.setFinishedTime(finishedTime);
-//    return p; 
-//
-//}
-
 void CPU::insertTask(Process newProcess, int quantumAvailable) {
     this->currentProcess = newProcess;
     this->hasProcess = true;
@@ -30,7 +13,7 @@ void CPU::insertTask(Process newProcess, int quantumAvailable) {
     std::cout << "CPU receives process with remaining burst of " << currentProcess.getRemainingTime() << " and time quantum of " << remainingQuantum << std::endl;
 }
 
-void CPU::runTask(int currentClock) { //i guess we have the current clock for debug purposes?
+void CPU::runTask(int currentClock) {
     this->currentProcess.decrementTimeRemaining(1);
     this->remainingQuantum--;
 
@@ -58,16 +41,7 @@ int CPU::getFinishedTime() {
 }
 
 bool CPU::isBusy() {
-    //if (finishedTime == currentClock) {
-    //    resetFinishedTime();
-    //}
-    //
-    //bool busy = true ? currentClock < finishedTime : false;
-    //std::cout << "-" << busy << std::endl;
-    //return busy;
-
     return hasProcess;
- 
 }
 
 bool CPU::isBusy(int currentClock) {
@@ -75,11 +49,8 @@ bool CPU::isBusy(int currentClock) {
         resetFinishedTime();
     }
     bool busy = true ? currentClock < finishedTime : false;
-    std::cout << "-" << busy << std::endl;
+    //std::cout << "-" << busy << std::endl;
     return busy;
-
-    //return hasProcess;
-
 }
 void CPU::resetFinishedTime() {
     finishedTime = -1;

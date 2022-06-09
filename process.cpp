@@ -11,13 +11,6 @@ Process::Process(std::string name, int arrival, int burst) {
     waitingTime = 0;
     startWaitingClock = 0; 
 }
-// void Process::operator=(const Process &p) {
-//     arrivalTime = p.arrivalTime;
-//     timeRemaining = p.timeRemaining;
-//     totalBurstTime = p.totalBurstTime;
-//     waitingTime = p.waitingTime;
-//     turnaroundTime = p.turnaroundTime;
-// }
 
 std::string Process::getName() {
     return name;
